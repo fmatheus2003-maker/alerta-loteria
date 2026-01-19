@@ -1,0 +1,29 @@
+name: Verificar Loteria Federal
+
+on:
+  schedule:
+    # Roda às quartas e sábados às 23:00 UTC (20:00 Horário de Brasília)
+    # Cron: Minuto Hora DiaMes Mês DiaSemana(0=Dom, 3=Qua, 6=Sab)
+    - cron: '0 23 * * 3,6'
+  workflow_dispatch: # Permite rodar manualmente para testar
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Instalar dependências
+        run: pip install requests
+
+      - name: Rodar verificação
+        env:
+          PHONE_NUMBER: ${{ secrets.PHONE_NUMBER }}
+          API_KEY: ${{ secrets.API_KEY }}
+        run: python main.py
