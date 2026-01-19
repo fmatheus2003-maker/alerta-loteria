@@ -1,9 +1,7 @@
 import requests
 import os
-from datetime import datetime
 
 # --- CONFIGURAÇÕES ---
-# Pegamos as senhas dos "Segredos" do GitHub para segurança
 PHONE_NUMBER = os.environ.get('PHONE_NUMBER')
 API_KEY = os.environ.get('API_KEY')
 
@@ -20,32 +18,45 @@ def enviar_whatsapp(mensagem):
 
 def verificar_loteria():
     print("Consultando API da Loteria...")
-    # Usando uma API pública para pegar o resultado
     try:
+        # Busca o resultado
         response = requests.get("https://loteriascaixa-api.herokuapp.com/api/federal", timeout=20)
         dados = response.json()
         
-        # Pega o primeiro prêmio (ex: "054852")
-        primeiro_premio = dados[0]['dezenas'][0] 
+        # Extrai as informações
+        primeiro_premio = dados[0]['dezenas'][0] # Ex: "054852"
         concurso = dados[0]['concurso']
         data_sorteio = dados[0]['data']
         
-        # Pega os últimos 3 dígitos
+        # Pega os 3 últimos dígitos
         final_sorteado = primeiro_premio[-3:]
         
-        print(f"Concurso: {concurso} | Sorteado: {primeiro_premio} | Final: {final_sorteado}")
+        print(f"Sorteado: {primeiro_premio} | Final: {final_sorteado}")
+        
+        # --- LÓGICA DA MENSAGEM ---
         
         if final_sorteado in NUMEROS_ALVO:
-            msg = (f"🚨 *BINGO!* 🚨\n\n"
-                   f"Na Federal (Conc. {concurso}), deu o número: *{primeiro_premio}*.\n"
-                   f"O final *{final_sorteado}* bate com seus números!\n"
-                   f"Confira o bilhete!")
-            enviar_whatsapp(msg)
+            # Mensagem de Vitória
+            msg = (f"🚨 *BINGO! DEU BOM!* 🚨\n\n"
+                   f"Federal Conc. *{concurso}*\n"
+                   f"Número: {primeiro_premio}\n"
+                   f"Final: *{final_sorteado}*\n\n"
+                   f"Bateu com seus números fixos!")
         else:
-            print(f"O final {final_sorteado} não bateu com {NUMEROS_ALVO}.")
+            # Mensagem de Acompanhamento (Só informa)
+            msg = (f"📢 *Resultado da Federal*\n"
+                   f"Conc. {concurso} ({data_sorteio})\n\n"
+                   f"Número: {primeiro_premio}\n"
+                   f"Final: *{final_sorteado}*\n\n"
+                   f"(Não bateu com {NUMEROS_ALVO})")
+        
+        # Envia a mensagem independente do resultado
+        enviar_whatsapp(msg)
             
     except Exception as e:
         print(f"Erro ao buscar loteria: {e}")
+        # Opcional: Avisar no zap se der erro na API
+        # enviar_whatsapp(f"Erro no robô da loteria: {e}")
 
 if __name__ == "__main__":
     if not PHONE_NUMBER or not API_KEY:
