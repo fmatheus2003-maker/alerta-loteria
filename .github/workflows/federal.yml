@@ -1,11 +1,12 @@
 name: Verificar Loteria Federal
 
 on:
+on:
   schedule:
-    # Roda às quartas e sábados às 23:00 UTC (20:00 Horário de Brasília)
-    # Cron: Minuto Hora DiaMes Mês DiaSemana(0=Dom, 3=Qua, 6=Sab)
-    - cron: '0 23 * * 3,6'
-  workflow_dispatch: # Permite rodar manualmente para testar
+    # Explicação: Minuto 0, Hora 23 (20h Brasil), Dias 15 a 21 do mês,
+    # MAS APENAS se for Quarta (3) ou Sábado (6).
+    - cron: '0 23 15-21 * 3,6'
+    workflow_dispatch: # Permite rodar manualmente para testar
 
 jobs:
   build:
